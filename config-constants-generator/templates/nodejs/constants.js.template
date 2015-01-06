@@ -1,0 +1,14 @@
+/**
+*  Template rendered constants
+**/
+
+module.exports = {
+{% for group, consts in constants.iteritems() %}
+
+	// {{group}}
+{% for const in consts %}
+	// (type: {{const.type_name}}) {{const.description}}
+	{{const.variable_name|upper}}:"{{const.property_name}}",
+{% endfor %}
+{% endfor %}
+}

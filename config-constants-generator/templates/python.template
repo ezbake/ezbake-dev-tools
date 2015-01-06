@@ -1,0 +1,19 @@
+def constant(f):
+    def fset(self, value):
+        raise SyntaxError('Unable to change constants')
+    def fget(self):
+        return f()
+    return property(fget, fset)
+
+class __EzBakePropertyConstants(object):
+{% for group, consts in constants.iteritems() %}
+
+    # [{{group}}]
+{% for const in consts %}
+    @constant    # (type: {{const.type_name}}) {{const.description}}
+    def {{const.variable_name|upper}}():
+        return "{{const.property_name}}"
+{% endfor %}
+{% endfor %}
+
+EzBakePropertyConstants = __EzBakePropertyConstants()

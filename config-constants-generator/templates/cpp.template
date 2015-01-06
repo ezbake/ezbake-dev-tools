@@ -1,0 +1,15 @@
+#include <string>
+
+namespace ezbake { namespace constants { namespace EzBakePropertyConstants {
+{% for group, consts in constants.iteritems() %}
+
+    //
+    // {{group}}
+    //
+
+{% for const in consts %}
+    // (type: {{const.type_name}}) {{const.description}}
+    static const std::string {{const.variable_name|upper}} = "{{const.property_name}}";
+{% endfor %}
+{% endfor %}
+}}} // namespace ezbake::constants::EzBakePropertyConstants

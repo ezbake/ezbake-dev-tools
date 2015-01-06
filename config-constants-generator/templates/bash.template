@@ -1,0 +1,5 @@
+{% for group, consts in constants.iteritems() %}
+{% for const in consts %}
+{{const.variable_name}}={{const.property_name}}
+{% endfor %}
+{% endfor %}

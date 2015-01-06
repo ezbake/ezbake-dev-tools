@@ -1,0 +1,8 @@
+{% for group, consts in constants.iteritems() %}
+
+# [{{group}}]
+{% for const in consts %}
+# (type: {{const.type_name}}) {{const.description}}
+{{const.variable_name}}= <%=scope.lookupvar("{{const.property_name|replace(".","::")}}")%>
+{% endfor %}
+{% endfor %}

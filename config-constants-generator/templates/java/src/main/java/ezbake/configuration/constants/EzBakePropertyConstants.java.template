@@ -1,0 +1,12 @@
+package ezbake.configuration.constants;
+
+public class EzBakePropertyConstants{
+{% for group, consts in constants.iteritems() %}
+
+	// {{group}}
+{% for const in consts %}
+	// (type: {{const.type_name}}) {{const.description}}
+	public final static String {{const.variable_name|upper}} = "{{const.property_name}}";
+{% endfor %}
+{% endfor %}
+}
