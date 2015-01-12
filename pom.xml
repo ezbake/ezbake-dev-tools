@@ -16,10 +16,12 @@
     <modules>
         <module>local-accumulo</module>
         <module>local-redis</module>
+        <module>protect-mock-services</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Third-Party dependencies -->
             <dependency>
                 <groupId>org.apache.accumulo</groupId>
                 <artifactId>accumulo-core</artifactId>
@@ -39,6 +41,23 @@
                 <groupId>redis.embedded</groupId>
                 <artifactId>embedded-redis</artifactId>
                 <version>0.3</version>
+            </dependency>
+
+            <!-- EzBake dependencies -->
+            <dependency>
+                <groupId>ezbake</groupId>
+                <artifactId>ezsecurity-services</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ezbake</groupId>
+                <artifactId>ezbake-base-thrift-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ezbake</groupId>
+                <artifactId>test-utils</artifactId>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
