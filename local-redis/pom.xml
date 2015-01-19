@@ -19,15 +19,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/bin</directory>
+            </resource>
+        </resources>
         <plugins>
-            <!-- Not sure why this was added. It doesn't fit the use case of local-redis -->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                <!--<configuration>-->
-                    <!--<descriptor>src/assembly/bin.xml</descriptor>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <configuration>
