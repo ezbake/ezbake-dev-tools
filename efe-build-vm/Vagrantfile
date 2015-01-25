@@ -1,0 +1,58 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+BOX = 'centos65'
+BOX_URL = 'https://github.com/2creatives/vagrant-centos/releases/download/v6.5.1/centos65-x86_64-20131205.box'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # Every Vagrant virtual environment requires a box to build off of.
+  config.vm.hostname = "efe-build-vm"
+  config.vm.box = BOX
+  config.vm.box_url = BOX_URL
+
+  # If true, then any SSH connections made will enable agent forwarding.
+  # Default value: false
+  config.ssh.forward_agent = true
+
+  config.vm.synced_folder "~/.m2", "/home/vagrant/.m2"
+  config.vm.synced_folder "~/.pip", "/home/vagrant/.pip"
+  config.vm.synced_folder "~/.pip", "/root/.pip"
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "1024"]
+  end
+
+  config.vm.provision :shell, :path => "provisioning/puppet_installation.sh"
+
+  config.vm.provision :shell do |shell|
+    shell.inline = "mkdir -p /etc/puppet/modules;
+                    puppet module install puppetlabs-stdlib"
+  end
+
+  config.vm.provision :puppet do |puppet|
+    puppet.manifest_file = "base.pp"
+    puppet.module_path = "modules"
+  end
+
+  config.vm.provision :shell do |shell|
+      shell.inline = "touch $1 && chmod 0440 $1 && echo $2 > $1"
+      shell.args = %q{/etc/sudoers.d/root_ssh_agent "Defaults    env_keep += \"SSH_AUTH_SOCK\""}
+  end
+
+  config.vm.provision :shell, :path => "provisioning/bootstrap.sh"
+  config.vm.provision :shell, :path => "provisioning/python_installation.sh"
+  config.vm.provision :shell, :path => "provisioning/thrift_installation.sh"
+  config.vm.provision :shell, :path => "provisioning/autoconf_installation.sh"
+  config.vm.provision :shell, :path => "provisioning/boost_library_patch.sh"
+  config.vm.provision :shell, :path => "provisioning/npm_installation.sh"
+  config.vm.provision :shell, :path => "provisioning/maven_installation.sh"
+  config.vm.provision :shell, :path => "provisioning/addusers.sh"
+
+  config.vm.provision :puppet do |puppet|
+    puppet.manifest_file = "site.pp"
+    puppet.module_path = "modules"
+  end
+
+end
