@@ -1,0 +1,560 @@
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/generate/t_cpp_generator.cc thrift_0.9.1_patch/compiler/cpp/src/generate/t_cpp_generator.cc
+--- thrift_0.9.1_base/compiler/cpp/src/generate/t_cpp_generator.cc	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/generate/t_cpp_generator.cc	2014-07-09 12:23:42.000000000 -0400
+@@ -3326,7 +3326,11 @@ void t_cpp_generator::generate_process_f
+       }
+     }
+ 
+-    out << " catch (const std::exception& e) {" << endl;
++    if (!tfunction->is_oneway()) {
++       out << " catch (const std::exception& e) {" << endl;
++    } else {
++       out << " catch (const std::exception&) {" << endl;
++    }
+ 
+     indent_up();
+     out <<
+@@ -3456,7 +3460,7 @@ void t_cpp_generator::generate_process_f
+ 
+     // TODO(dreiss): Handle TExceptions?  Expose to server?
+     out <<
+-      indent() << "catch (const std::exception& exn) {" << endl <<
++      indent() << "catch (const std::exception&) {" << endl <<
+       indent() << "  if (this->eventHandler_.get() != NULL) {" << endl <<
+       indent() << "    this->eventHandler_->handlerError(ctx, " <<
+         service_func_name << ");" << endl <<
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/generate/t_java_generator.cc thrift_0.9.1_patch/compiler/cpp/src/generate/t_java_generator.cc
+--- thrift_0.9.1_base/compiler/cpp/src/generate/t_java_generator.cc	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/generate/t_java_generator.cc	2014-07-09 12:23:42.000000000 -0400
+@@ -2824,10 +2824,9 @@ void t_java_generator::generate_process_
+      t_struct* xs = tfunction->get_xceptions();
+      const std::vector<t_field*>& xceptions = xs->get_members();
+      vector<t_field*>::const_iterator x_iter;
+-     bool first = true;
+      if (xceptions.size() > 0) {
+     	 for (x_iter = xceptions.begin(); x_iter != xceptions.end(); ++x_iter) {
+-    		 first ? first = false : indent(f_service_) << "else ";
++    		 if (x_iter != xceptions.begin()) indent(f_service_) << "else ";
+     		 indent(f_service_) << "if (e instanceof " << type_name((*x_iter)->get_type(), false, false)<<") {" << endl;
+     		 indent(f_service_) << indent() << "result." << (*x_iter)->get_name() << " = (" << type_name((*x_iter)->get_type(), false, false) << ") e;" << endl;
+     	  	 indent(f_service_) << indent() << "result.set" << get_cap_name((*x_iter)->get_name()) << get_cap_name("isSet") << "(true);" << endl;
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/generate/t_py_generator.cc thrift_0.9.1_patch/compiler/cpp/src/generate/t_py_generator.cc
+--- thrift_0.9.1_base/compiler/cpp/src/generate/t_py_generator.cc	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/generate/t_py_generator.cc	2014-07-09 12:23:42.000000000 -0400
+@@ -1698,7 +1698,7 @@ void t_py_generator::generate_service_re
+           S_IRUSR
+         | S_IWUSR
+         | S_IXUSR
+-#ifndef MINGW
++#ifndef _WIN32
+         | S_IRGRP
+         | S_IXGRP
+         | S_IROTH
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/generate/t_rb_generator.cc thrift_0.9.1_patch/compiler/cpp/src/generate/t_rb_generator.cc
+--- thrift_0.9.1_base/compiler/cpp/src/generate/t_rb_generator.cc	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/generate/t_rb_generator.cc	2014-07-09 12:23:42.000000000 -0400
+@@ -359,21 +359,19 @@ void t_rb_generator::generate_enum(t_enu
+   
+   // Create a hash mapping values back to their names (as strings) since ruby has no native enum type
+   f_types_.indent() << "VALUE_MAP = {";
+-  bool first = true;
+   for(c_iter = constants.begin(); c_iter != constants.end(); ++c_iter) {
+     // Populate the hash
+     int value = (*c_iter)->get_value();
+-    first ? first = false : f_types_ << ", ";
++    if (c_iter != constants.begin()) f_types_ << ", ";
+     f_types_ << value << " => \"" << capitalize((*c_iter)->get_name()) << "\"";
+   }
+   f_types_ << "}" << endl;
+   
+   // Create a set with valid values for this enum
+   f_types_.indent() << "VALID_VALUES = Set.new([";
+-  first = true;
+   for (c_iter = constants.begin(); c_iter != constants.end(); ++c_iter) {
+     // Populate the set
+-    first ? first = false : f_types_ << ", ";
++    if (c_iter != constants.begin()) f_types_ << ", ";
+     f_types_ << capitalize((*c_iter)->get_name());
+   }
+   f_types_ << "]).freeze" << endl;
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/main.cc thrift_0.9.1_patch/compiler/cpp/src/main.cc
+--- thrift_0.9.1_base/compiler/cpp/src/main.cc	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/main.cc	2014-07-09 12:23:42.000000000 -0400
+@@ -39,13 +39,14 @@
+ #include <errno.h>
+ #include <limits.h>
+ 
+-#ifdef MINGW
++#ifdef _WIN32
+ # include <windows.h> /* for GetFullPathName */
+ #endif
+ 
+ // Careful: must include globals first for extern definitions
+ #include "globals.h"
+ 
++#include "platform.h"
+ #include "main.h"
+ #include "parse/t_program.h"
+ #include "parse/t_scope.h"
+@@ -161,11 +162,11 @@ int g_allow_64bit_consts = 0;
+ bool gen_recurse = false;
+ 
+ /**
+- * MinGW doesn't have realpath, so use fallback implementation in that case,
++ * Win32 doesn't have realpath, so use fallback implementation in that case,
+  * otherwise this just calls through to realpath
+  */
+ char *saferealpath(const char *path, char *resolved_path) {
+-#ifdef MINGW
++#ifdef _WIN32
+   char buf[MAX_PATH];
+   char* basename;
+   DWORD len = GetFullPathName(path, MAX_PATH, buf, &basename);
+@@ -190,7 +191,7 @@ char *saferealpath(const char *path, cha
+ }
+ 
+ bool check_is_directory(const char *dir_name) {
+-#ifdef MINGW
++#ifdef _WIN32
+   DWORD attributes = ::GetFileAttributesA(dir_name);
+   if(attributes == INVALID_FILE_ATTRIBUTES) {
+     fprintf(stderr, "Output directory %s is unusable: GetLastError() = %ld\n", dir_name, GetLastError());
+@@ -336,7 +337,7 @@ string include_file(string filename) {
+   // Absolute path? Just try that
+   if (filename[0] == '/') {
+     // Realpath!
+-    char rp[PATH_MAX];
++    char rp[THRIFT_PATH_MAX];
+     if (saferealpath(filename.c_str(), rp) == NULL) {
+       pwarning(0, "Cannot open include file %s\n", filename.c_str());
+       return std::string();
+@@ -358,7 +359,7 @@ string include_file(string filename) {
+       string sfilename = *(it) + "/" + filename;
+ 
+       // Realpath!
+-      char rp[PATH_MAX];
++      char rp[THRIFT_PATH_MAX];
+       if (saferealpath(sfilename.c_str(), rp) == NULL) {
+         continue;
+       }
+@@ -517,8 +518,13 @@ char* clean_up_doctext(char* doctext) {
+     docstring += '\n';
+   }
+ 
+-  assert(docstring.length() <= strlen(doctext));
+-  strcpy(doctext, docstring.c_str());
++  //assert(docstring.length() <= strlen(doctext));  may happen, see THRIFT-1755
++  if(docstring.length() <= strlen(doctext)) {
++    strcpy(doctext, docstring.c_str());
++  } else {
++    free(doctext);  // too short
++    doctext = strdup(docstring.c_str());
++  }
+   return doctext;
+ }
+ 
+@@ -752,8 +758,8 @@ void validate_const_rec(std::string name
+       }
+     }
+     if (!found) {
+-      throw "type error: const " + name + " was declared as type " 
+-        + type->get_name() + " which is an enum, but " 
++      throw "type error: const " + name + " was declared as type "
++        + type->get_name() + " which is an enum, but "
+         + value->get_identifier() + " is not a valid value for that enum";
+     }
+   } else if (type->is_struct() || type->is_xception()) {
+@@ -806,6 +812,18 @@ void validate_const_rec(std::string name
+ }
+ 
+ /**
++ * Check simple identifier names
++ * It's easier to do it this way instead of rewriting the whole grammar etc.
++ */
++void validate_simple_identifier(const char* identifier) {
++  string name( identifier);
++  if( name.find(".") != string::npos) {
++    yyerror("Identifier %s can't have a dot.", identifier);
++    exit(1);
++  }
++}
++
++/**
+  * Check the type of the parsed const information against its declared type
+  */
+ void validate_const_type(t_const* c) {
+@@ -1022,7 +1040,7 @@ int main(int argc, char** argv) {
+         }
+         out_path = arg;
+ 
+-#ifdef MINGW
++#ifdef _WIN32
+         //strip out trailing \ on Windows
+         int last = out_path.length()-1;
+         if (out_path[last] == '\\')
+@@ -1060,7 +1078,7 @@ int main(int argc, char** argv) {
+   }
+ 
+   // Real-pathify it
+-  char rp[PATH_MAX];
++  char rp[THRIFT_PATH_MAX];
+   if (argv[i] == NULL) {
+     fprintf(stderr, "Missing file name\n");
+     usage();
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/main.h thrift_0.9.1_patch/compiler/cpp/src/main.h
+--- thrift_0.9.1_base/compiler/cpp/src/main.h	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/main.h	2014-07-09 12:23:42.000000000 -0400
+@@ -58,6 +58,11 @@ void pverbose(const char* fmt, ...);
+ void failure(const char* fmt, ...);
+ 
+ /**
++ * Check simple identifier names
++ */
++void validate_simple_identifier(const char* identifier);
++
++/**
+  * Check constant types
+  */
+ void validate_const_type(t_const* c);
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/parse/t_field.h thrift_0.9.1_patch/compiler/cpp/src/parse/t_field.h
+--- thrift_0.9.1_base/compiler/cpp/src/parse/t_field.h	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/parse/t_field.h	2014-07-09 12:23:42.000000000 -0400
+@@ -155,7 +155,7 @@ class t_field : public t_doc {
+  * not it was specified by the user or automatically chosen.
+  */
+ struct t_field_id {
+-  int64_t value;
++  int32_t value;
+   bool auto_assigned;
+ };
+ 
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/platform.h thrift_0.9.1_patch/compiler/cpp/src/platform.h
+--- thrift_0.9.1_base/compiler/cpp/src/platform.h	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/platform.h	2014-07-09 12:23:42.000000000 -0400
+@@ -22,7 +22,11 @@
+  * is different for the non-POSIX MinGW
+  */
+ 
+-#ifdef MINGW
++#ifdef _MSC_VER
++#include "windows/config.h"
++#endif
++
++#ifdef _WIN32
+ #include <direct.h>
+ #include <io.h>
+ #else
+@@ -30,8 +34,14 @@
+ #include <sys/stat.h>
+ #endif
+ 
+-#if defined MINGW
++#ifdef _WIN32
+ #define MKDIR(x) mkdir(x)
+ #else
+ #define MKDIR(x) mkdir(x, S_IRWXU | S_IRWXG | S_IRWXO)
+ #endif
++
++#ifdef PATH_MAX
++#define THRIFT_PATH_MAX PATH_MAX
++#else
++#define THRIFT_PATH_MAX MAX_PATH
++#endif
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/thriftl.ll thrift_0.9.1_patch/compiler/cpp/src/thriftl.ll
+--- thrift_0.9.1_base/compiler/cpp/src/thriftl.ll	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/thriftl.ll	2014-07-09 12:23:42.000000000 -0400
+@@ -33,13 +33,26 @@
+  * We should revert the Makefile.am changes once Apple ships a reasonable
+  * GCC.
+  */
++#ifdef __GNUC__
+ #pragma GCC diagnostic ignored "-Wunused-function"
+ #pragma GCC diagnostic ignored "-Wunused-label"
++#endif
+ 
++#ifdef _MSC_VER
++//warning C4102: 'find_rule' : unreferenced label
++#pragma warning(disable:4102)
++//avoid isatty redefinition
++#define YY_NEVER_INTERACTIVE 1
++#endif
++
++#include <cassert>
+ #include <string>
+ #include <errno.h>
+ #include <stdlib.h>
+ 
++#ifdef _MSC_VER
++#include "windows/config.h"
++#endif
+ #include "main.h"
+ #include "globals.h"
+ #include "parse/t_program.h"
+@@ -366,7 +379,9 @@ literal_begin (['\"])
+   if (g_parse_mode == PROGRAM) {
+     clear_doctext();
+     g_doctext = strdup(yytext + 3);
+-    g_doctext[strlen(g_doctext) - 2] = '\0';
++    assert(strlen(g_doctext) >= 2);
++    g_doctext[strlen(g_doctext) - 2] = ' ';
++    g_doctext[strlen(g_doctext) - 1] = '\0';
+     g_doctext = clean_up_doctext(g_doctext);
+     g_doctext_lineno = yylineno;
+   }
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/thrifty.yy thrift_0.9.1_patch/compiler/cpp/src/thrifty.yy
+--- thrift_0.9.1_base/compiler/cpp/src/thrifty.yy	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/thrifty.yy	2014-07-09 12:23:42.000000000 -0400
+@@ -34,11 +34,19 @@
+ #include <stdint.h>
+ #endif
+ #include <limits.h>
++#ifdef _MSC_VER
++#include "windows/config.h"
++#endif
+ #include "main.h"
+ #include "globals.h"
+ #include "parse/t_program.h"
+ #include "parse/t_scope.h"
+ 
++#ifdef _MSC_VER
++//warning C4065: switch statement contains 'default' but no 'case' labels
++#pragma warning(disable:4065)
++#endif
++
+ /**
+  * This global variable is used for automatic numbering of field indices etc.
+  * when parsing the members of a struct. Field values are automatically
+@@ -515,6 +523,7 @@ Typedef:
+   tok_typedef FieldType tok_identifier TypeAnnotations
+     {
+       pdebug("TypeDef -> tok_typedef FieldType tok_identifier");
++      validate_simple_identifier( $3);
+       t_typedef *td = new t_typedef(g_program, $2, $3);
+       $$ = td;
+       if ($4 != NULL) {
+@@ -536,6 +545,7 @@ Enum:
+     {
+       pdebug("Enum -> tok_enum tok_identifier { EnumDefList }");
+       $$ = $4;
++      validate_simple_identifier( $2);
+       $$->set_name($2);
+       if ($6 != NULL) {
+         $$->annotations_ = $6->annotations_;
+@@ -581,7 +591,8 @@ EnumDef:
+       if ($4 > INT_MAX) {
+         pwarning(1, "64-bit value supplied for enum %s.\n", $2);
+       }
+-      $$ = new t_enum_value($2, $4);
++      validate_simple_identifier( $2);
++      $$ = new t_enum_value($2, static_cast<int>($4));
+       if ($1 != NULL) {
+         $$->set_doc($1);
+       }
+@@ -594,6 +605,7 @@ EnumDef:
+   CaptureDocText tok_identifier TypeAnnotations CommaOrSemicolonOptional
+     {
+       pdebug("EnumDef -> tok_identifier");
++      validate_simple_identifier( $2);
+       $$ = new t_enum_value($2);
+       if ($1 != NULL) {
+         $$->set_doc($1);
+@@ -608,6 +620,7 @@ Senum:
+   tok_senum tok_identifier '{' SenumDefList '}' TypeAnnotations
+     {
+       pdebug("Senum -> tok_senum tok_identifier { SenumDefList }");
++      validate_simple_identifier( $2);
+       $$ = new t_typedef(g_program, $4, $2);
+       if ($6 != NULL) {
+         $$->annotations_ = $6->annotations_;
+@@ -641,6 +654,7 @@ Const:
+     {
+       pdebug("Const -> tok_const FieldType tok_identifier = ConstValue");
+       if (g_parse_mode == PROGRAM) {
++        validate_simple_identifier( $3);
+         g_scope->resolve_const_value($5, $2);
+         $$ = new t_const($2, $3, $5);
+         validate_const_type($$);
+@@ -661,7 +675,7 @@ ConstValue:
+       $$ = new t_const_value();
+       $$->set_integer($1);
+       if (!g_allow_64bit_consts && ($1 < INT32_MIN || $1 > INT32_MAX)) {
+-        pwarning(1, "64-bit constant \"%"PRIi64"\" may not work in all languages.\n", $1);
++        pwarning(1, "64-bit constant \"%" PRIi64"\" may not work in all languages.\n", $1);
+       }
+     }
+ | tok_dub_constant
+@@ -748,6 +762,7 @@ Struct:
+   StructHead tok_identifier XsdAll '{' FieldList '}' TypeAnnotations
+     {
+       pdebug("Struct -> tok_struct tok_identifier { FieldList }");
++      validate_simple_identifier( $2);
+       $5->set_xsd_all($3);
+       $5->set_union($1 == struct_is_union);
+       $$ = $5;
+@@ -757,7 +772,7 @@ Struct:
+         delete $7;
+       }
+     }
+-    
++
+ XsdAll:
+   tok_xsd_all
+     {
+@@ -802,6 +817,7 @@ Xception:
+   tok_xception tok_identifier '{' FieldList '}' TypeAnnotations
+     {
+       pdebug("Xception -> tok_xception tok_identifier { FieldList }");
++      validate_simple_identifier( $2);
+       $4->set_name($2);
+       $4->set_xception(true);
+       $$ = $4;
+@@ -815,6 +831,7 @@ Service:
+   tok_service tok_identifier Extends '{' FlagArgs FunctionList UnflagArgs '}' TypeAnnotations
+     {
+       pdebug("Service -> tok_service tok_identifier { FunctionList }");
++      validate_simple_identifier( $2);
+       $$ = $6;
+       $$->set_name($2);
+       $$->set_extends($3);
+@@ -868,6 +885,7 @@ FunctionList:
+ Function:
+   CaptureDocText Oneway FunctionType tok_identifier '(' FieldList ')' Throws TypeAnnotations CommaOrSemicolonOptional
+     {
++      validate_simple_identifier( $4);
+       $6->set_name(std::string($4) + "_args");
+       $$ = new t_function($3, $4, $6, $8, $2);
+       if ($1 != NULL) {
+@@ -932,6 +950,7 @@ Field:
+           exit(1);
+         }
+       }
++      validate_simple_identifier($5);
+       $$ = new t_field($4, $5, $2.value);
+       $$->set_req($3);
+       if ($6 != NULL) {
+@@ -968,24 +987,24 @@ FieldIdentifier:
+              * warn if the user-specified negative value isn't what
+              * thrift would have auto-assigned.
+              */
+-            pwarning(1, "Nonpositive field key (%"PRIi64") differs from what would be "
++            pwarning(1, "Nonpositive field key (%" PRIi64") differs from what would be "
+                      "auto-assigned by thrift (%d).\n", $1, y_field_val);
+           }
+           /*
+            * Leave $1 as-is, and update y_field_val to be one less than $1.
+            * The FieldList parsing will catch any duplicate key values.
+            */
+-          y_field_val = $1 - 1;
+-          $$.value = $1;
++          y_field_val = static_cast<int32_t>($1 - 1);
++          $$.value = static_cast<int32_t>($1);
+           $$.auto_assigned = false;
+         } else {
+-          pwarning(1, "Nonpositive value (%"PRIi64") not allowed as a field key.\n",
++          pwarning(1, "Nonpositive value (%d) not allowed as a field key.\n",
+                    $1);
+           $$.value = y_field_val--;
+           $$.auto_assigned = true;
+         }
+       } else {
+-        $$.value = $1;
++        $$.value = static_cast<int32_t>($1);
+         $$.auto_assigned = false;
+       }
+     }
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/windows/config.h thrift_0.9.1_patch/compiler/cpp/src/windows/config.h
+--- thrift_0.9.1_base/compiler/cpp/src/windows/config.h	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/windows/config.h	2014-07-09 12:23:42.000000000 -0400
+@@ -37,6 +37,10 @@
+ #define PRIu64 "I64d"
+ #define PRIi64 "I64d"
+ 
++// squelch deprecation warnings
+ #pragma warning(disable:4996)
++// squelch bool conversion performance warning
++#pragma warning(disable:4800)
++
+ 
+ #endif // _THRIFT_WINDOWS_CONFIG_H_
+diff -rupN thrift_0.9.1_base/compiler/cpp/src/windows/version.h.in thrift_0.9.1_patch/compiler/cpp/src/windows/version.h.in
+--- thrift_0.9.1_base/compiler/cpp/src/windows/version.h.in	2014-07-09 12:23:09.000000000 -0400
++++ thrift_0.9.1_patch/compiler/cpp/src/windows/version.h.in	2014-07-09 12:23:42.000000000 -0400
+@@ -28,15 +28,6 @@
+ #error "This is a Windows header only"
+ #endif
+ 
+-#define PATH_MAX MAX_PATH
+ #define THRIFT_VERSION "@PACKAGE_VERSION@"
+ 
+-#ifndef S_ISDIR
+-#define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
+-#endif
+-
+-#ifndef S_ISREG
+-#define S_ISREG(mode)  (((mode) & S_IFMT) == S_IFREG)
+-#endif
+-
+ #endif // _THRIFT_WINDOWS_VERSION_H_
+diff -rupN thrift_0.9.1_base/contrib/mingw-cross-compile.sh thrift_0.9.1_patch/contrib/mingw-cross-compile.sh
+--- thrift_0.9.1_base/contrib/mingw-cross-compile.sh	2014-07-09 12:23:14.000000000 -0400
++++ thrift_0.9.1_patch/contrib/mingw-cross-compile.sh	2014-07-09 12:23:47.000000000 -0400
+@@ -15,8 +15,7 @@ set -e
+   --without-go \
+   --without-d \
+   --build=i686-pc-linux-gnu \
+-  --host=i586-mingw32msvc \
+-  CPPFLAGS='-DMINGW'
++  --host=i586-mingw32msvc
+ 
+ make
+ 
+diff -rupN thrift_0.9.1_base/tutorial/cpp/CppClient.cpp thrift_0.9.1_patch/tutorial/cpp/CppClient.cpp
+--- thrift_0.9.1_base/tutorial/cpp/CppClient.cpp	2014-07-09 12:23:15.000000000 -0400
++++ thrift_0.9.1_patch/tutorial/cpp/CppClient.cpp	2014-07-09 12:23:48.000000000 -0400
+@@ -38,9 +38,9 @@ using namespace shared;
+ using namespace boost;
+ 
+ int main(int argc, char** argv) {
+-  shared_ptr<TTransport> socket(new TSocket("localhost", 9090));
+-  shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+-  shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
++  boost::shared_ptr<TTransport> socket(new TSocket("localhost", 9090));
++  boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
++  boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+   CalculatorClient client(protocol);
+ 
+   try {
+diff -rupN thrift_0.9.1_base/tutorial/cpp/CppServer.cpp thrift_0.9.1_patch/tutorial/cpp/CppServer.cpp
+--- thrift_0.9.1_base/tutorial/cpp/CppServer.cpp	2014-07-09 12:23:15.000000000 -0400
++++ thrift_0.9.1_patch/tutorial/cpp/CppServer.cpp	2014-07-09 12:23:48.000000000 -0400
+@@ -113,11 +113,11 @@ protected:
+ 
+ int main(int argc, char **argv) {
+ 
+-  shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+-  shared_ptr<CalculatorHandler> handler(new CalculatorHandler());
+-  shared_ptr<TProcessor> processor(new CalculatorProcessor(handler));
+-  shared_ptr<TServerTransport> serverTransport(new TServerSocket(9090));
+-  shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
++  boost::shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
++  boost::shared_ptr<CalculatorHandler> handler(new CalculatorHandler());
++  boost::shared_ptr<TProcessor> processor(new CalculatorProcessor(handler));
++  boost::shared_ptr<TServerTransport> serverTransport(new TServerSocket(9090));
++  boost::shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
+ 
+   TSimpleServer server(processor,
+                        serverTransport,
+@@ -128,10 +128,10 @@ int main(int argc, char **argv) {
+   /**
+    * Or you could do one of these
+ 
+-  shared_ptr<ThreadManager> threadManager =
++  boost::shared_ptr<ThreadManager> threadManager =
+     ThreadManager::newSimpleThreadManager(workerCount);
+-  shared_ptr<PosixThreadFactory> threadFactory =
+-    shared_ptr<PosixThreadFactory>(new PosixThreadFactory());
++  boost::shared_ptr<PosixThreadFactory> threadFactory =
++    boost::shared_ptr<PosixThreadFactory>(new PosixThreadFactory());
+   threadManager->threadFactory(threadFactory);
+   threadManager->start();
+   TThreadPoolServer server(processor,
