@@ -2,6 +2,9 @@
 
 CUR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+PARENT_REPO=$(git --git-dir /home/vagrant/.sync_git config --get remote.origin.url)
+REPO_ROOT=${PARENT_REPO%/*}
+
 EFE_BRANCH="master"
 EFEUI_BRANCH="master"
 
@@ -19,7 +22,7 @@ if [ ! -d $EFE_REPO_NAME ];then
     echo "cloning $EFE_REPO_NAME with a sparse checkout of ./efe"
     git init $EFE_REPO_NAME
     cd $EFE_REPO_NAME
-    git remote add -f origin git@git.lab76.org:ezbake-new/$EFE_REPO_NAME.git
+    git remote add -f origin $REPO_ROOT/$EFE_REPO_NAME.git
     git config core.sparsecheckout true
     echo "efe/" >> .git/info/sparse-checkout
     git pull origin $EFE_BRANCH
@@ -41,7 +44,7 @@ if [ ! -d $EFEUI_REPO_NAME ];then
     echo "cloning $EFEUI_REPO_NAME with a sparse checkout of ./efe, ./classificationbanner"
     git init $EFEUI_REPO_NAME
     cd $EFEUI_REPO_NAME
-    git remote add -f origin git@git.lab76.org:ezbake-new/$EFEUI_REPO_NAME.git
+    git remote add -f origin $REPO_ROOT/$EFEUI_REPO_NAME.git
     git config core.sparsecheckout true
     echo "efe/" >> .git/info/sparse-checkout
     echo "classificationbanner/" >> .git/info/sparse-checkout

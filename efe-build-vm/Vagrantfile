@@ -19,6 +19,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "~/.m2", "/home/vagrant/.m2"
   config.vm.synced_folder "~/.pip", "/home/vagrant/.pip"
   config.vm.synced_folder "~/.pip", "/root/.pip"
+  config.vm.synced_folder "../.git", "/home/vagrant/.sync_git"
 
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", "1024"]
