@@ -1,4 +1,5 @@
 #Example constants file
+
 [Accumulo Constants] #This is a group
 #This is a comment
 ACCUMULO_INSTANCE_NAME|accumulo.instance.name|string|Property which represents the name of the accumulo instance #This is a constant
@@ -13,14 +14,17 @@ ACCUMULO_USE_SSL|accumulo.use.ssl|boolean|Property which specifies if accumulo c
 ACCUMULO_SSL_TRUSTSTORE_PATH|accumulo.ssl.truststore.path|string|Property which specifies the path to the accumulo truststore
 ACCUMULO_SSL_TRUSTSTORE_TYPE|accumulo.ssl.truststore.type|string|Property which specifies the type of the accumulo truststore
 ACCUMULO_SSL_TRUSTSTORE_PASSWORD|accumulo.ssl.truststore.password|string|Property which specifies the password for the accumulo truststore
+
 [Application Constants]
 EZBAKE_APPLICATION_NAME|application.name|string|Property which represents the name of the application
 EZBAKE_APPLICATION_VERSION|ezbake.application.version|string|Property which represents the version of the application
 EZBAKE_APPLICATION_INSTANCE_NUMBER|ezbake.application.instance.number|string|Property which specifies the instance of this install
+
 [Azkaban Constants]
 AZKABAN_URL|azkaban.url|string|Property which represents url for azkaban
 AZKABAN_PASSWORD|azkaban.password|string|Property which represents azkaban password
 AZKABAN_USERNAME|azkaban.username|string|Property which represents azkaban username
+
 [Common Services Constants]
 CAPCO|CapcoService|string|Property which represents capco service
 DATAWAREHOUSE|warehaus|string|Property which represents datawarehouse service
@@ -36,15 +40,19 @@ INTERNAL_NAME_SERVICE|ins|string|Property which represents internal name service
 SELECTOR_EXTRACTION|selext|string|Property which represents selector extraction service
 SSR|ssrService|string|Property which represents ssr service
 TEMPORAL_NORMALIZER|temporalsvc|string|Property which represents temporal normalizer service
-[Elastic Search Constants]
-ELASTICSEARCH_CLUSTER_NAME|elastic.cluster.name|string|Property which represents elastic search cluster name key in ezconfig
-ELASTICSEARCH_FORCE_REFRESH_ON_PUT|elastic.force.refresh|string|Property which represents elastic search force refresh key in ezconfig
-ELASTICSEARCH_HOST|elastic.host.name|string|Property which represents elastic search host name key in ezconfig
-ELASTICSEARCH_PORT|elastic.port|string|Property which represents elastic search port key in ezconfig
+
+[Elasticsearch Constants]
+ELASTICSEARCH_CLUSTER_NAME|elastic.cluster.name|string|Property which represents Elasticsearch cluster name
+ELASTICSEARCH_FORCE_REFRESH_ON_PUT|elastic.force.refresh|string|Property which represents Elasticsearch force refresh
+ELASTICSEARCH_HOST|elastic.host.name|string|Property which represents Elasticsearch host name
+ELASTICSEARCH_PORT|elastic.port|string|Property which represents Elasticsearch Java API port
+ELASTICSEARCH_THRIFT_PORT|elastic.port.thrift|string|Property which represents Elasticsearch Thrift API port
+
 [Hadoop Constants]
 HADOOP_FILESYSTEM_NAME|fs.default.name|string|Property which represents ezconfig string to get default filesystem name
 HADOOP_FILESYSTEM_IMPL|fs.hdfs.impl|string|Property which represents ezconfig string to get hdfs implementation
 HADOOP_FILESYSTEM_USE_LOCAL|fs.use.local|string|Property which represents ezconfig string to get filesystem use local value
+
 [Flume Constants]
 FLUME_AGENT_TYPE|flume.agent.type|string|Property which represents flume key for agent type
 FLUME_BACK_OFF|flume.backoff|string|Property which represents flume key for backoff
@@ -60,6 +68,7 @@ FLUME_MAX_EVENTS|flume.max.events|string|Property which represents flume key for
 FLUME_REQUEST_TIMEOUT|flume.request.timeout|string|Property which represents flume key for request timeout
 FLUME_RUN_INTERVAL|flume.run.interval|string|Property which represents flume key for run interval
 FLUME_SLEEP_INTERVAL|flume.sleep.interval|string|Property which represents flume key for sleep interval
+
 [Kafka Constants]
 KAFKA_ZOOKEEPER|kafka.zookeeper.connect|string|Property which represents kafka zookeeper connection string
 KAFKA_BROKER_LIST|kafka.metadata.broker.list|string|Property which represents kafka broker list ezconfig property
@@ -67,6 +76,7 @@ KAFKA_QUEUE_TIME|kafka.queue.time|int|Property which represents the time that me
 KAFKA_QUEUE_SIZE|kafka.queue.size|string|Property which represents the amount of messages that are queued in memory before flushing to Kafka if using an async producer
 KAFKA_PRODUCER_TYPE|kafka.producer.type|string|Property which represents the type of producer (sync or async) used by Kafka
 KAFKA_ZOOKEEPER_SESSION_TIMEOUT|kafka.zk.sessiontimeout.ms|int|Property which represents the zookeeper timeout for Kafka consumers
+
 [Mongo Configuration Constants]
 MONGODB_HOST_NAME|mongodb.host.name|string|Property which represents mongo db host name ezconfig key
 MONGODB_PORT|mongodb.port|int|Property which represents mongo db port number key
@@ -75,6 +85,7 @@ MONGODB_USER_NAME|mongodb.user.name|string|Property which represents mongo db us
 MONGODB_PASSWORD|mongodb.password|string|Property which represents mongo db password ezconfig key
 MONGODB_USE_SSL|mongodb.use.ssl|string|Property which represents mongo db use ssl ezconfig key
 MONGODB_CONNECTION_STRING|mongodb.connection.string|string|Property which represents the connection string that can be used to access mongo
+
 [Postgres Constants]
 POSTGRES_DB|postgres.db|string|Property which represents postgres db ezconfig key
 POSTGRES_HOST|postgres.host|string|Property which represents postgres host ezconfig key
@@ -82,10 +93,12 @@ POSTGRES_PASSWORD|postgres.password|string|Property which represents postgres pa
 POSTGRES_PORT|postgres.port|string|Property which represents postgres port ezconfig key
 POSTGRES_USERNAME|postgres.username|string|Property which represents postgres username ezconfig key
 POSTGRES_USE_SSL|postgres.use.ssl|string|Property which represents whether postgres connection uses ssl ezconfig key
+
 [Redis Constants]
 REDIS_HOST|redis.host|int|Property which represents redis host ezconfig key
 REDIS_PORT|redis.port|string|Property which represents redis post ezconfig key
 REDIS_DB_INDEX|redis.db.index|int|Property which represents redis db index ezconfig key
+
 [Security Constants]
 EZBAKE_SECURITY_ID|ezbake.security.app.id|string|Property which represents the security id
 EZBAKE_USER_CACHE_TYPE|ezbake.security.cache.type|string|Property which represents cache type ezconfig key
@@ -105,11 +118,12 @@ EZBAKE_USE_FORWARD_PROXY|ezbake.frontend.use.forward.proxy|string|Property which
 EZBAKE_SSL_PROTOCOL_KEY|ezbake.ssl.protocol|string|Property which represents ssl protocol ezconfig key
 EZBAKE_SSL_CIPHERS_KEY|ezbake.ssl.ciphers|string|Property which represents ssl ciphers ezconfig key
 EZBAKE_SSL_PEER_AUTH_REQUIRED|ezbake.ssl.peer.validation|string|Property which represents peer validation ezconfig key
-EZBAKE_SSL_USE_DEFAULT_SSL_KEY|ezbake.security.default.ssl|boolean|Property which tells us if we are using the default ssl key 
+EZBAKE_SSL_USE_DEFAULT_SSL_KEY|ezbake.security.default.ssl|boolean|Property which tells us if we are using the default ssl key
 EZBAKE_APPLICATION_TRUSTED_CERT|ezbake.ssl.trustedcert.file|string|Property which represents the trusted certificates file
 EZBAKE_APPLICATION_PRIVATE_KEY_FILE|ezbake.ssl.privatekey.file|string|Property which represents the private key file
 EZBAKE_APPLICATION_CERT_FILE|ezbake.ssl.certificate.file|string|Property which represents the certificates file
 EZBAKE_APPLICATION_PUBLIC_KEY_FILE|ezbake.ssl.servicekey.file|string|Property which represents the public key file for a service
+
 [SSL Constants]
 SYSTEM_KEYSTORE_PATH|system.keystore.path|string|Property which represents the path to the system keystore
 SYSTEM_KEYSTORE_TYPE|system.keystore.type|string|Property which represents the type of the system keystore
@@ -123,19 +137,24 @@ EZBAKE_APPLICATION_KEYSTORE_PASS|ezbake.ssl.keystore.pass|string|Property which 
 EZBAKE_APPLICATION_TRUSTSTORE_FILE|ezbake.ssl.truststore.file|string|Property which represents truststore file ezconfig key
 EZBAKE_APPLICATION_TRUSTSTORE_TYPE|ezbake.ssl.truststore.type|string|Property which represents truststore type ezconfig key
 EZBAKE_APPLICATION_TRUSTSTORE_PASS|ezbake.ssl.truststore.pass|string|Property which represents truststore password ezconfig key
+
 [Service Constants]
 EZBAKE_CERTIFICATES_DIRECTORY|ezbake.security.ssl.dir|string|Property representing the location to the certificates directory
 EZBAKE_SERVICE_NAME|service.name|string|Property which represents the name of the service
+
 [Storm Constants]
 STORM_NIMBUS_HOST|storm.nimbus.host|string|Property representing the nimbus host
 STORM_NIMBUS_THRIFT_PORT|storm.nimbus.thrift.port|int|Property representing the nimbus port
+
 [System Constants]
 EZBAKE_ADMIN_APPLICATION_DEPLOYMENT|ezbake.system.admin.application.deployment|string|Property which represents ezbake admin application deployment ezconfig key
 EZBAKE_LOG_DIRECTORY|ezbake.log.directory|string|Property which represents ezbake log directory ezconfig key
 EZBAKE_LOG_TO_STDOUT|ezbake.log.stdout|string|Property which represents ezbake log standard out ezconfig key
 EZBAKE_SHARED_SECRET_ENVIRONMENT_VARIABLE|ezbake.shared.secret.environment.variable|string|Property which represents the environment variable for the shared secret
+
 [System Services Constants]
 FRONTEND|orionfrontend|string|Property which represents frontend service
+
 [Thrift Constants]
 THRIFT_MAX_IDLE_CLIENTS|thrift.max.idle.clients|string|Property which represents thrifts max idle clients ezconfig key
 THRIFT_MAX_POOL_CLIENTS|thrift.max.pool.clients|string|Property which represents thrifts max pool clients ezconfig key
@@ -152,6 +171,7 @@ THRIFT_ABANDON_ON_BORROW|thrift.pool.abandon.on.borrow|boolean|Whether to abando
 THRIFT_ABANDON_ON_MAINTENANCE|thrift.pool.abandon.on.maintenance|boolean|Whether to abandon objects if they exceed the abandon timeout when the evictor runs
 THRIFT_ABANDON_TIMEOUT|thrift.pool.abandon.timeout|string|Timeout in seconds before an abandoned object is removed
 THRIFT_FRAMED_TRANSPORT|tframe.transport|boolean|Whether or not to use the thrift framed transport
+
 [Web Application Constants]
 EZBAKE_WEB_APPLICATION_EXTERNAL_DOMAIN|web.application.external.domain|string|Property which represents web application external domain ezconfig key
 EZBAKE_WEB_APPLICATION_METRICS_ENDPOINT|web.application.metrics.endpoint|string|Property which represents web application metrics endpoint ezconfig key
@@ -159,10 +179,12 @@ EZBAKE_WEB_APPLICATION_METRICS_SITEID|web.application.metrics.siteid|string|Prop
 EZBAKE_WEB_APPLICATION_BANNER_TEXT|web.application.security.banner.text|string|Property which represents security description banner: text
 EZBAKE_WEB_APPLICATION_BANNER_BGCOLOR|web.application.security.banner.background.color|string|Property which represents security description banner: background color
 EZBAKE_WEB_APPLICATION_BANNER_TEXTCOLOR|web.application.security.banner.text.color|string|Property which represents security description banner: text color
+
 [Zookeeper Constants]
 ZOOKEEPER_CONNECTION_STRING|zookeeper.connection.string|string|Property which is a CSV of zookeeper servers (host:port)
+
 [MonetDB Constants]
 MONETDB_USERNAME|monetdb.username|string|The MonetDB Username
 MONETDB_PASSWORD|monetdb.password|string|The MonetDB Password
 MONETDB_HOSTNAME|monetdb.hostname|string|The hostname of the MonetDB server
-MONETDB_PORT|monetdb.port|int|The port number that MonetDB is running on 
+MONETDB_PORT|monetdb.port|int|The port number that MonetDB is running on
