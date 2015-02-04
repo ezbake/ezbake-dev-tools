@@ -21,7 +21,7 @@ if [ $? -eq 1 ];then
     fi
     cd ${NODE_PACKAGE}
     echo ".. installing npm"
-    ./configure
+    ./configure --prefix=/usr
     make
     sudo make install
     echo ".. installed node `node --version`"
