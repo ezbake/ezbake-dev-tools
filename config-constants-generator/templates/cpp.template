@@ -1,3 +1,6 @@
+#ifndef EZBAKE_PROPERTY_CONSTANTS
+#define EZBAKE_PROPERTY_CONSTANTS
+
 #include <string>
 
 namespace ezbake { namespace constants { namespace EzBakePropertyConstants {
@@ -13,3 +16,5 @@ namespace ezbake { namespace constants { namespace EzBakePropertyConstants {
 {% endfor %}
 {% endfor %}
 }}} // namespace ezbake::constants::EzBakePropertyConstants
+
+#endif
