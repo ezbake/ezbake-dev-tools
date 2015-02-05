@@ -123,7 +123,6 @@ EZBAKE_APPLICATION_TRUSTED_CERT|ezbake.ssl.trustedcert.file|string|Property whic
 EZBAKE_APPLICATION_PRIVATE_KEY_FILE|ezbake.ssl.privatekey.file|string|Property which represents the private key file
 EZBAKE_APPLICATION_CERT_FILE|ezbake.ssl.certificate.file|string|Property which represents the certificates file
 EZBAKE_APPLICATION_PUBLIC_KEY_FILE|ezbake.ssl.servicekey.file|string|Property which represents the public key file for a service
-EZBAKE_VALIDATE_PEER|ezbake.security.validate.peer|string|Property which represents whether SSL peer validation is required
 
 [SSL Constants]
 SYSTEM_KEYSTORE_PATH|system.keystore.path|string|Property which represents the path to the system keystore
