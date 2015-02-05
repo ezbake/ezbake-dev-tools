@@ -1,9 +1,9 @@
-#ifndef EZBAKE_PROPERTY_CONSTANTS
-#define EZBAKE_PROPERTY_CONSTANTS
+#ifndef EZBAKE_CONFIGURATION_CONSTANTS
+#define EZBAKE_CONFIGURATION_CONSTANTS
 
 #include <string>
 
-namespace ezbake { namespace constants { namespace EzBakePropertyConstants {
+namespace ezbake { namespace configuration { namespace constants {
 {% for group, consts in constants.iteritems() %}
 
     //
@@ -15,6 +15,6 @@ namespace ezbake { namespace constants { namespace EzBakePropertyConstants {
     static const std::string {{const.variable_name|upper}} = "{{const.property_name}}";
 {% endfor %}
 {% endfor %}
-}}} // namespace ezbake::constants::EzBakePropertyConstants
+}}} // namespace ezbake::configuration::constants
 
 #endif
