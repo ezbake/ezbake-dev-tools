@@ -20,5 +20,5 @@ dependency-reduced-pom.xml
 *.pyc
 *.pyo
 
-# RPM
-*.rpm
+# RPMs
+rpmbuild
