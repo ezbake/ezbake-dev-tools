@@ -1,0 +1,12 @@
+from setuptools import setup, find_packages
+
+setup(
+    name='{PACKAGE_NAME}',
+    version='{PACKAGE_VERSION}',
+    description='{PACKAGE_NAME} Thrift Library',
+    author='EzBake Developers',
+    author_email='developers@ezbake.io',
+    packages=find_packages('.'),
+    {PACKAGE_ADDITIONAL_SETUP_ARGS}
+)
+
