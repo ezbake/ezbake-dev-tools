@@ -19,10 +19,18 @@ import xml.etree.ElementTree as ET
 import argparse
 
 MODULE_DIR = 'module_dir'
-NAMESPACE_PKGS = 'namespace_packages'
-NAMESPACE_PKG_CONTENTS = "__import__('pkg_resources').declare_namespace(__name__)\n"
 COMMON_DEPS = ['thrift==0.9.1']
+EXCLUDED_DEPS = ['libthrift', 'thrift']
 PY_DEV_VERSION = "rc1.dev"
+NAMESPACE_PKGS = 'namespace_packages'
+NAMESPACE_PKG_CONTENTS = """# this is a namespace package
+try:
+    import pkg_resources
+    pkg_resources.declare_namespace(__name__)
+except ImportError:
+    import pkgutil
+    __path__ = pkgutil.extend_path(__path__, __name__)
+"""
 
 
 def make_namespace_packages(start, basepkg=None):
@@ -124,7 +132,7 @@ def main(args):
         namespace_packages = data[NAMESPACE_PKGS]
         pkg_name, pkg_version, dependencies = parse_pom(os.path.join(module_dir, 'pom.xml'))
         pkg_version = maven_version_to_py(pkg_version)
-        dependencies = ["{0}>={1}".format(x, pkg_version) for x in dependencies]
+        dependencies = ["{0}>={1}".format(x, pkg_version) for x in dependencies if x not in EXCLUDED_DEPS]
         dependencies.extend(COMMON_DEPS)
 
         print("Generating setup.py for {0}. Name: {1}, Version: {2}".format(
