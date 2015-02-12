@@ -54,9 +54,9 @@ Visibility has become more complicated as of 2.0 and thus there is special synta
     
 Where the fields are described below:
 
- 1. *Formal authorizations/CAPCO* - Formal authorizations string, this is almost always a CAPCO classification. 
+ 1. *Formal authorizations/CAPCO* - Formal authorizations string, a CAPCO classification would be an example. 
    * UNCLASSIFIED//REL TO FVEY
- 1. *External auths* - A string of external groups/COI's with boolean combinations supported.  
+ 1. *External auths* - A string of external groups with boolean combinations supported.  
    * A|B|(C&D)
  1. *Platform visibilities* - Separate read/write/discover/manage groups for internal platform groups.  Each one of these
     visibilies is a set of 64-bit integers representing the group memberships that are required to perform the given action.
