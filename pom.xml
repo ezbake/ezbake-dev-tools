@@ -114,5 +114,21 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <configuration>
+                    <excludes combine.children="append">
+                        <exclude>/efe-build-vm/provisioning/BOOST_json_parser_read.hpp.patch</exclude>
+                        <exclude>/efe-build-vm/provisioning/thrift_0.9.1_patches_2201_667_1755_2045_2229_.patch</exclude>
+                        <exclude>/efe-build-vm/Vagrantfile</exclude>
+                        <exclude>/rpm-tools/macros.ezbake</exclude>
+                        <exclude>/thrift-repl/ezbake-config.properties.default</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>
