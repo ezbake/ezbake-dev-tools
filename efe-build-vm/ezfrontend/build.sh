@@ -18,6 +18,8 @@ CUR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 PARENT_REPO=$(git --git-dir /home/vagrant/.sync_git config --get remote.origin.url)
 REPO_ROOT=${PARENT_REPO%/*}
+REPO_DOMAIN=${REPO_ROOT#*@}
+REPO_DOMAIN=${REPO_DOMAIN%:*}
 
 EFE_BRANCH="master"
 EFEUI_BRANCH="master"
@@ -29,9 +31,13 @@ EFEUI_REPO_NAME="ezbake-platform-ui"
 #set abort on error
 set -e
 
+#prefetch repo domain ssh keys if it doesn't already exist
+if [[ ! -n $(ssh-keygen -H -F $REPO_DOMAIN 2>/dev/null) ]];then
+    ssh-keyscan -H $REPO_DOMAIN 2>/dev/null >> ~/.ssh/known_hosts
+fi
 
-##EFE
-#clone repo if needed
+
+#clone EFE repo if needed
 if [ ! -d $EFE_REPO_NAME ];then
     echo "cloning $EFE_REPO_NAME with a sparse checkout of ./efe"
     git init $EFE_REPO_NAME
@@ -42,18 +48,7 @@ if [ ! -d $EFE_REPO_NAME ];then
     git pull origin $EFE_BRANCH
     cd ../
 fi
-
-#run efe builds
-echo -e "\nRunning efe builds ..."
-cd $EFE_REPO_NAME/efe
-./build.sh
-mv *.rpm $CUR_DIR/.
-cd $CUR_DIR
-echo -e "\nDone building efe rpms. RPMs are located in $CUR_DIR"
-
-
-##EFE-UI
-#clone repo if needed
+#clone EFEUI repo if needed
 if [ ! -d $EFEUI_REPO_NAME ];then
     echo "cloning $EFEUI_REPO_NAME with a sparse checkout of ./efe, ./classificationbanner"
     git init $EFEUI_REPO_NAME
@@ -65,6 +60,16 @@ if [ ! -d $EFEUI_REPO_NAME ];then
     git pull origin $EFEUI_BRANCH
     cd ../
 fi
+
+
+##
+#run efe builds
+echo -e "\nRunning efe builds ..."
+cd $EFE_REPO_NAME/efe
+./build.sh
+mv *.rpm $CUR_DIR/.
+cd $CUR_DIR
+echo -e "\nDone building efe rpms. RPMs are located in $CUR_DIR"
 
 #run efeui builds
 echo -e "\n\nRunning efeui builds ..."
