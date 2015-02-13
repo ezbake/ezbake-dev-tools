@@ -2,18 +2,21 @@
 # vi: set ft=ruby :
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
-BOX = 'centos65'
-BOX_URL = 'https://github.com/2creatives/vagrant-centos/releases/download/v6.5.1/centos65-x86_64-20131205.box'
+$VAGRANTFILE_API_VERSION = "2"
+$BOX = 'centos65'
+$BOX_URL = 'https://github.com/2creatives/vagrant-centos/releases/download/v6.5.1/centos65-x86_64-20131205.box'
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  # Every Vagrant virtual environment requires a box to build off of.
+$install_puppet = <<SCRIPT
+echo Installing puppet
+rpm -ivh --nosignature https://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
+rpm -qs --quiet puppet || yum -y install puppet
+SCRIPT
+
+
+Vagrant.configure($VAGRANTFILE_API_VERSION) do |config|
   config.vm.hostname = "efe-build-vm"
-  config.vm.box = BOX
-  config.vm.box_url = BOX_URL
-
-  # If true, then any SSH connections made will enable agent forwarding.
-  # Default value: false
+  config.vm.box = $BOX
+  config.vm.box_url = $BOX_URL
   config.ssh.forward_agent = true
 
   config.vm.synced_folder "~/.m2", "/home/vagrant/.m2"
@@ -21,38 +24,44 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "~/.pip", "/root/.pip"
   config.vm.synced_folder "../.git", "/home/vagrant/.sync_git"
 
-  config.vm.provider :virtualbox do |vb|
+  config.vm.provider "virtualbox" do |vb|
     vb.customize ["modifyvm", :id, "--memory", "1024"]
   end
 
-  config.vm.provision :shell, :path => "provisioning/puppet_installation.sh"
+  #install required modules
+  config.vm.provision "shell", inline: $install_puppet
+  config.vm.provision "shell", inline: "mkdir -p /etc/puppet/modules;
+                                        puppet module install puppetlabs-stdlib"
+  config.vm.provision "shell", inline: "mkdir -p /etc/puppet/modules;
+                                        puppet module install puppetlabs-vcsrepo"
 
-  config.vm.provision :shell do |shell|
-    shell.inline = "mkdir -p /etc/puppet/modules;
-                    puppet module install puppetlabs-stdlib"
+  config.vm.provision "puppet" do |p|
+    p.manifest_file = "base.pp"
+    p.module_path = "modules"
   end
 
-  config.vm.provision :puppet do |puppet|
-    puppet.manifest_file = "base.pp"
-    puppet.module_path = "modules"
+  config.vm.provision "shell" do |s|
+      s.inline = "touch $1 && chmod 0440 $1 && echo $2 > $1"
+      s.args = %q{/etc/sudoers.d/root_ssh_agent "Defaults    env_keep += \"SSH_AUTH_SOCK\""}
   end
 
-  config.vm.provision :shell do |shell|
-      shell.inline = "touch $1 && chmod 0440 $1 && echo $2 > $1"
-      shell.args = %q{/etc/sudoers.d/root_ssh_agent "Defaults    env_keep += \"SSH_AUTH_SOCK\""}
+  # add github to the list of known_hosts
+  config.vm.provision "shell" do |s|
+    s.inline = "mkdir -p $1 && touch $2 && ssh-keyscan -H $3 >> $2 && chmod 600 $2"
+    s.args = %q{/root/.ssh /root/.ssh/known_hosts "github.com"}
   end
 
-  config.vm.provision :shell, :path => "provisioning/python_installation.sh"
-  config.vm.provision :shell, :path => "provisioning/thrift_installation.sh"
-  config.vm.provision :shell, :path => "provisioning/autoconf_installation.sh"
-  config.vm.provision :shell, :path => "provisioning/boost_library_patch.sh"
-  config.vm.provision :shell, :path => "provisioning/npm_installation.sh"
-  config.vm.provision :shell, :path => "provisioning/maven_installation.sh"
-  config.vm.provision :shell, :path => "provisioning/addusers.sh"
+  config.vm.provision "shell", path: "provisioning/python_installation.sh"
+  config.vm.provision "shell", path: "provisioning/thrift_installation.sh"
+  config.vm.provision "shell", path: "provisioning/autoconf_installation.sh"
+  config.vm.provision "shell", path: "provisioning/boost_library_patch.sh"
+  config.vm.provision "shell", path: "provisioning/npm_installation.sh"
+  config.vm.provision "shell", path: "provisioning/maven_installation.sh"
+  config.vm.provision "shell", path: "provisioning/addusers.sh"
 
-  config.vm.provision :puppet do |puppet|
-    puppet.manifest_file = "site.pp"
-    puppet.module_path = "modules"
+  config.vm.provision "puppet" do |p|
+    p.manifest_file = "site.pp"
+    p.module_path = "modules"
   end
 
 end

@@ -20,11 +20,6 @@ class reverseproxy {
     provider => yum
   }
 
-  package { "pyinstaller":
-    ensure => latest,
-    provider => pip
-  }
-
   file { "/usr/lib64/libboost_thread.so":
     ensure => link,
     target => "/usr/lib64/libboost_thread-mt.so",
@@ -41,5 +36,22 @@ class reverseproxy {
     path => '/home/vagrant/.bashrc',
   }
   create_resources(file_line, $maven_exports, $maven_export_defaults)
+
+  file { '/opt/python-2.7.6/bin/pip':
+    ensure => present,
+  } -> #and then:
+  vcsrepo { '/opt/pyinstaller':
+    ensure => latest,
+    owner => vagrant,
+    group => vagrant,
+    provider => git,
+    source => 'git@github.com:ezbake/pyinstaller.git',
+    revision => 'develop'
+  } ~> #and then notify:
+  exec { 'install custom pyinstaller':
+    cwd => '/opt/pyinstaller',
+    command => '/opt/python-2.7.6/bin/pip install .',
+    refreshonly => true,
+  }
 }
 
