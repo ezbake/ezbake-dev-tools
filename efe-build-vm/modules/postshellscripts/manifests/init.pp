@@ -1,4 +1,4 @@
-/*   Copyright (C) 2013-2014 Computer Sciences Corporation
+/*   Copyright (C) 2013-2015 Computer Sciences Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,32 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-class reverseproxy {
-  $build_yum = [ "boost", "boost-devel", "python-devel", "libevent", "libevent-devel", "pcre", "pcre-devel", "readline-devel", "mlocate", "vim-enhanced", "tree", "libedit", "libtool", "byacc", "flex", "apr", "apr-devel", "apr-util", "apr-util-devel", ]
+class postshellscripts {
 
-  package { $build_yum:
-    ensure => latest,
-    provider => yum
-  }
-
-  file { "/usr/lib64/libboost_thread.so":
-    ensure => link,
-    target => "/usr/lib64/libboost_thread-mt.so",
-    require => Package["boost", "boost-devel"]
-  }
-
-  $maven_exports = {
+  $system_exports = {
     'maven home' => { line => 'export M2_HOME=/usr/local/apache-maven' },
-    'maven bin' => { line => 'export M2=$M2_HOME/bin', require => file_line['maven home'] },
-    'maven path' => { line => 'export PATH=$M2:$PATH', require => file_line['maven bin'] },
+    'maven bin' => { line => 'export M2=$M2_HOME/bin', require => File_line['maven home'] },
+    'maven path' => { line => 'export PATH=$M2:$PATH', require => File_line['maven bin'] },
+    'ld library path' => { line => 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64:/usr/lib:/usr/local/lib64:/usr/local/lib' },
   }
-  $maven_export_defaults = {
+  $system_export_defaults = {
     ensure => present,
     path => '/home/vagrant/.bashrc',
   }
-  create_resources(file_line, $maven_exports, $maven_export_defaults)
+  create_resources(file_line, $system_exports, $system_export_defaults)
 
-  file { '/opt/python-2.7.6/bin/pip':
+  file { '/opt/python-2.7.9/bin/pip':
     ensure => present,
   } -> #and then:
   vcsrepo { '/opt/pyinstaller':
@@ -50,7 +39,7 @@ class reverseproxy {
   } ~> #and then notify:
   exec { 'install custom pyinstaller':
     cwd => '/opt/pyinstaller',
-    command => '/opt/python-2.7.6/bin/pip install .',
+    command => '/opt/python-2.7.9/bin/pip install .',
     refreshonly => true,
   }
 }
