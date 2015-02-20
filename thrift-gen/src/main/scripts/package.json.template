@@ -2,7 +2,6 @@
   "name": "{PACKAGE_NAME}",
   "version": "{PACKAGE_VERSION}",
   "description": "{PACKAGE_NAME} Thrift Library",
-  "private": true,
   "keywords": ["thrift","ezbake"],
   "license": "Apache 2.0",
   "author": {{
