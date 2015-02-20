@@ -14,7 +14,7 @@
 #   limitations under the License.
 
 
-PY_VERSION="2.7.9"
+PY_VERSION="2.7.6"
 THRIFT_VERSION="0.9.1"
 THRIFT_INSTALLED=$(thrift -version 2>/dev/null | grep -F "${THRIFT_VERSION}" | wc -l)
 CHECKSUM="d2e46148f6e800a9492dbd848c66ab6e"

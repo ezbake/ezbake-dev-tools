@@ -14,7 +14,7 @@
 #   limitations under the License.
 
 
-PY_VERSION="2.7.9"
+PY_VERSION="2.7.6"
 
 if [ -d rp_env_setup ];
 then
