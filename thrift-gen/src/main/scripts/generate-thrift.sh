@@ -21,6 +21,8 @@ function gen_thrift () {
     language_name=$2
     language_gen_suffix=$3
     language_opt=$4
+    declare -a args=("$@")
+    language_args=${args[@]:4}
 
     thrift_gen="$thrift_src/../../../target/thrift-gen/$language_gen_suffix"
     artifact_base="${thrift_src}/../../../"
@@ -36,7 +38,7 @@ function gen_thrift () {
             echo "[WARN] Skipping Go because it is not installed or on the path"
         else
             echo "Generating $language_name code for $(basename ${thrift_file})"
-            thrift ${common_args} --gen ${language_opt} -out "${thrift_gen}" "${thrift_file}"
+            thrift ${common_args} --gen ${language_opt} ${language_args} -out "${thrift_gen}" "${thrift_file}"
         fi
     done
 
@@ -50,7 +52,9 @@ function gen_thrift () {
     elif [[ ${language_name} == "Python" ]]; then
         # delete top level __init__.py
         rm -f "${thrift_gen}"/__init__.py
-        ./generate_setup.py -m "${artifact_base}"
+        ./generate_package_manifest.py -m "${artifact_base}" -t ${language_gen_suffix}
+    elif [[ ${language_name} == "NodeJS" ]]; then
+        ./generate_package_manifest.py -m "${artifact_base}" -t ${language_gen_suffix}
     fi
 }
 
@@ -58,7 +62,7 @@ declare -a GENS=(\
     "Java java java:hashcode" \
     "C++ cpp cpp:cob_style" \
     "Python python py:new_style" \
-    "NodeJS node js:node" \
+    "NodeJS node js:node -r" \
     "Go go go")
 
 THRIFT_REQ_VERSION="0.9.1"
