@@ -52,9 +52,9 @@ function gen_thrift () {
     elif [[ ${language_name} == "Python" ]]; then
         # delete top level __init__.py
         rm -f "${thrift_gen}"/__init__.py
-        ./generate_package_manifest.py -m "${artifact_base}" -t python
+        ./generate_package_manifest.py -m "${artifact_base}" -t ${language_gen_suffix}
     elif [[ ${language_name} == "NodeJS" ]]; then
-        ./generate_package_manifest.py -m "${artifact_base}" -t node
+        ./generate_package_manifest.py -m "${artifact_base}" -t ${language_gen_suffix}
     fi
 }
 
