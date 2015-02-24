@@ -34,7 +34,7 @@ class postshellscripts {
     owner => vagrant,
     group => vagrant,
     provider => git,
-    source => 'git@github.com:ezbake/pyinstaller.git',
+    source => 'https://github.com/ezbake/pyinstaller.git',
     revision => 'develop'
   } ~> #and then notify:
   exec { 'install custom pyinstaller':
