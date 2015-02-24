@@ -21,6 +21,7 @@ import fnmatch
 import os
 import platform
 from pprint import pformat
+import re
 
 import requests
 import rpm
@@ -101,26 +102,26 @@ def deploy_rpm(rpm_path, deploy_url, auth):
         return requests.put(deploy_url, data=rpm_file, auth=auth)
 
 
-def get_deployed_snapshots(base_url, repo_name, rpm_hdr, auth):
-    """Get all snapshots associated with the given RPM information"""
+def get_deployed_rpms(base_url, repo_name, rpm_hdr, auth, release_glob):
+    """Get all URLs associated with the given RPM information"""
     yum_path = create_yum_path(rpm_hdr)
 
     query_url = (
-        '%s/api/search/pattern?pattern=%s:%s/%s-%s-SNAPSHOT*.rpm' % (
+        '%s/api/search/pattern?pattern=%s:%s/%s-%s-%s.rpm' % (
             base_url, repo_name, yum_path, rpm_hdr['name'],
-            rpm_hdr['version']))
+            rpm_hdr['version'], release_glob))
 
-    snapshot_info_resp = requests.get(query_url, auth=auth)
-    if snapshot_info_resp.status_code != requests.codes.ok:
+    info_resp = requests.get(query_url, auth=auth)
+    if info_resp.status_code != requests.codes.ok:
         raise RuntimeError(
-            'Could not get info for existing snapshots for '
-            '%s-%s-SNAPSHOT' % (rpm_hdr['name'], rpm_hdr['version']))
+            'Could not get info for existing RPMs for %s-%s-%s' % (
+                rpm_hdr['name'], rpm_hdr['version'], release_glob))
 
-    snapshot_files = snapshot_info_resp.json()['files']
-    snapshot_files.sort(reverse=True)
+    matching_files = info_resp.json()['files']
+    matching_files.sort(reverse=True)
 
     url_prefix = url_join(base_url, repo_name)
-    return [url_join(url_prefix, suffix) for suffix in snapshot_files]
+    return [url_join(url_prefix, suffix) for suffix in matching_files]
 
 
 def delete_deployed_rpm(rpm_url, auth):
@@ -138,8 +139,38 @@ def main(working_dir, base_url, repo_name, auth, num_snapshots):
         print('*' * 40)
 
         rpm_hdr = read_rpm_header(rpm_path)
-
+        is_snapshot = is_snapshot_rpm(rpm_hdr)
         deploy_url = create_deploy_url(base_url, repo_name, rpm_path, rpm_hdr)
+
+        # Skip deploying released RPMs with the same release or gitrev
+        if not is_snapshot:
+            git_rev_match = re.search(
+                r'\.git\.([0-9a-f]{7})', rpm_hdr['release'])
+
+            if git_rev_match is None:  # Check exact release match
+                same_release_urls = get_deployed_rpms(
+                    base_url, repo_name, rpm_hdr, auth, rpm_hdr['release'] + '*')
+
+                if same_release_urls:
+                    print(
+                        'Skipping deploying %s. Existing release exists with '
+                        'the exact same RPM release:\n\t%s' %
+                        (rpm_basename, '\n\t'.join(same_release_urls)))
+
+                    continue
+            else:  # Check matching gitrev
+                git_rev = git_rev_match.group(1)
+                same_rev_urls = get_deployed_rpms(
+                    base_url, repo_name, rpm_hdr, auth, '*.git.%s*' % git_rev)
+
+                if same_rev_urls:
+                    print(
+                        'Skipping deploying %s. Existing release exists with '
+                        'the same Git revision:\n\t%s' %
+                        (rpm_basename, '\n\t'.join(same_rev_urls)))
+
+                    continue
+
         print('Deploying %s to %s' % (rpm_basename, deploy_url))
         deploy_resp = deploy_rpm(rpm_path, deploy_url, auth)
         if deploy_resp.status_code != requests.codes.created:
@@ -149,9 +180,9 @@ def main(working_dir, base_url, repo_name, auth, num_snapshots):
         print('Deployed %s:\n%s' % (rpm_basename, pformat(deploy_resp.json())))
 
         # Perform snapshot management by deleting stale snapshots
-        if is_snapshot_rpm(rpm_hdr):
-            snapshot_urls = get_deployed_snapshots(
-                base_url, repo_name, rpm_hdr, auth)
+        if is_snapshot:
+            snapshot_urls = get_deployed_rpms(
+                base_url, repo_name, rpm_hdr, auth, 'SNAPSHOT*')
 
             print('Found the following snapshot URLs:\n\t%s' %
                   '\n\t'.join(snapshot_urls))

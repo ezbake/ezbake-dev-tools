@@ -17,12 +17,14 @@ function build_rpm() {
     spec_file=$1
     ezbake_version=$2
     is_release_build=$3
+    git_file_last_changed=$4
 
     rpmbuild \
         --quiet \
         --define="_topdir $PWD/rpmbuild" \
         --define="ezbake_version $ezbake_version" \
         --define="ezbake_release_build $is_release_build" \
+        --define="git_file_last_changed $git_file_last_changed" \
         -bb \
         rpmbuild/SPECS/$spec_file
 }
@@ -51,4 +53,4 @@ echo "Copying spec files to RPM build directory"
 cp rpm-tools/ezbake-rpm-tools.spec rpmbuild/SPECS/ezbake-rpm-tools.spec
 
 echo "Building RPMs"
-build_rpm ezbake-rpm-tools.spec $ezbake_version $is_release_build
+build_rpm ezbake-rpm-tools.spec $ezbake_version $is_release_build rpm-tools
