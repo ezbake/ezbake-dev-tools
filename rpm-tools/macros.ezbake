@@ -2,11 +2,6 @@
 # To make use of these macros insert the following line into your spec file:
 # %include %{_rpmconfigdir}/macros.ezbake
 
-%if %{undefined ezbake_version}
-    # Fail the build with a undefined tag error if ezbake_version is undefined
-    %error "You must define ezbake_version"
-%endif
-
 # Last git revision in this copy of the project.
 %define ezbake_git_shortrev %(git rev-parse --short HEAD)
 
