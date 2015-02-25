@@ -2,17 +2,26 @@
 # To make use of these macros insert the following line into your spec file:
 # %include %{_rpmconfigdir}/macros.ezbake
 
-# Last git revision in this copy of the project.
-%define ezbake_git_shortrev %(git rev-parse --short HEAD)
+%if %{defined git_file_last_changed}
+    # Last git revision that changed the requested file or directory
+    %define ezbake_git_shortrev %(git log -1 --pretty=format:%h -- %{git_file_last_changed})
 
-# Timestamp, in seconds since epoch, of the last commit on this branch of this
-# project, according to git.
-%define ezbake_git_timestamp %(git log -1 --pretty=format:%ct)
+    # Timestamp, in seconds since epoch, of the last commit that changed the
+    # requested file or directory
+    %define ezbake_git_timestamp %(git log -1 --pretty=format:%ct -- %{git_file_last_changed})
+%else
+    # Last git revision in this copy of the project.
+    %define ezbake_git_shortrev %(git rev-parse --short HEAD)
+
+    # Timestamp, in seconds since epoch, of the last commit on this branch of this
+    # project, according to git.
+    %define ezbake_git_timestamp %(git log -1 --pretty=format:%ct)
+%endif
 
 # Datetime, in the same format as EzBake release notation (also happens to be
 # the same as EzBake Maven plugin), of the last commit on this branch of the
 # project, according to git.
-%define ezbake_git_datetime %(date -d @`git log -1 --pretty=format:%ct` +%%Y%%m%%d%%H%%M%%S)
+%define ezbake_git_datetime %(date -d @%{ezbake_git_timestamp} +%%Y%%m%%d%%H%%M%%S)
 
 # The datetime that this rpm is being built
 %define ezbake_build_datetime %(date -u +%%Y%%m%%d%%H%%M%%S)
