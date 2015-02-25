@@ -13,11 +13,33 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-
 function build_rpm() {
     spec_file=$1
-    rpmbuild --quiet --define="_topdir $PWD/rpmbuild" -bb rpmbuild/SPECS/$spec_file
+    ezbake_version=$2
+    is_release_build=$3
+
+    rpmbuild \
+        --quiet \
+        --define="_topdir $PWD/rpmbuild" \
+        --define="ezbake_version $ezbake_version" \
+        --define="ezbake_release_build $is_release_build" \
+        -bb \
+        rpmbuild/SPECS/$spec_file
 }
+
+echo "Getting Maven project version information"
+mvn_proj_version=$(mvn -q \
+                  --non-recursive \
+                  org.codehaus.mojo:exec-maven-plugin:1.3.1:exec \
+                  -Dexec.executable="echo" \
+                  -Dexec.args='${project.version}')
+
+ezbake_version=${mvn_proj_version%%-SNAPSHOT}
+if [[ $mvn_proj_version = *-SNAPSHOT ]]; then
+    is_release_build=0
+else
+    is_release_build=1
+fi
 
 echo "Creating RPM build directories"
 mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
@@ -29,4 +51,4 @@ echo "Copying spec files to RPM build directory"
 cp rpm-tools/ezbake-rpm-tools.spec rpmbuild/SPECS/ezbake-rpm-tools.spec
 
 echo "Building RPMs"
-build_rpm ezbake-rpm-tools.spec
+build_rpm ezbake-rpm-tools.spec $ezbake_version $is_release_build

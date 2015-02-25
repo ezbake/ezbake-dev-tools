@@ -2,9 +2,6 @@
 # To make use of these macros insert the following line into your spec file:
 # %include %{_rpmconfigdir}/macros.ezbake
 
-# Platform version. Bump when the rest of the platform gets bumped.
-%define ezbake_version 2.1
-
 # Last git revision in this copy of the project.
 %define ezbake_git_shortrev %(git rev-parse --short HEAD)
 
@@ -20,18 +17,22 @@
 # The datetime that this rpm is being built
 %define ezbake_build_datetime %(date -u +%%Y%%m%%d%%H%%M%%S)
 
-# Release (typically a snapshot with a datetime). When making a real release
-# (not a snapshot), override the macro.  The suggested mechanism is to override
-# on the command line when calling rpmbuild, i.e.,
+# When making a real release (not a snapshot), define the
+# ezbake_release_build macro to 1. The suggested mechanism is to override on
+# the command line when calling rpmbuild:
 #
-#       rpmbuild -ba -D 'ezbake_release 1' ...
+#       rpmbuild -ba -D 'ezbake_release_build 1' ...
 #
-# or whatever release number is appropriate.
-#
-# Defaults to a snapshot timestamped with the either the datetime of the last
-# commit if a git repo or build datetime otherwise.
-%if %(git rev-parse --git-dir 2> /dev/null | wc -l)
-    %define ezbake_release SNAPSHOT%{ezbake_build_datetime}.%{ezbake_git_shortrev}
+%if %{defined ezbake_release_build} && %{ezbake_release_build} == 1
+    %define ezbake_release_prefix %{nil}
 %else
-    %define ezbake_release SNAPSHOT%{ezbake_build_datetime}
+    %define ezbake_release_prefix SNAPSHOT
 %endif
+
+%if %(git rev-parse --git-dir 2> /dev/null | wc -l)
+    %define ezbake_release_suffix .git.%{ezbake_git_shortrev}
+%else
+    %define ezbake_release_suffix %{nil}
+%endif
+
+%define ezbake_release %{ezbake_release_prefix}%{ezbake_build_datetime}%{ezbake_release_suffix}

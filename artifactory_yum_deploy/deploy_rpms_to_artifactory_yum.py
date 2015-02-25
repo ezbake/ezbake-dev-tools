@@ -21,13 +21,9 @@ import fnmatch
 import os
 import platform
 from pprint import pformat
-import re
 
 import requests
 import rpm
-
-
-SNAPSHOT_RE = r'SNAPSHOT|\d{14}'
 
 
 def str_to_auths(s):
@@ -65,7 +61,7 @@ def is_snapshot_rpm(rpm_hdr):
     """
     Returns True if the RPM with the given header is for a snapshot, else False
     """
-    return re.match(SNAPSHOT_RE, rpm_hdr['release']) is not None
+    return rpm_hdr['release'].startswith('SNAPSHOT')
 
 
 def create_yum_path(rpm_hdr):
