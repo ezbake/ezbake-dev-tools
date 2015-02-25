@@ -1,4 +1,4 @@
-/*   Copyright (C) 2013-2014 Computer Sciences Corporation
+/*   Copyright (C) 2013-2015 Computer Sciences Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. */
 
-class base {
-  $build_base = [ "wget", "git", "rpm-build", "zlib-devel", "java-1.7.0-openjdk-devel", "openssl-devel", "boost", "boost-devel" ]
+class preshellscripts {
+  $pkgs = [ "wget", "git", "rpm-build", "zlib-devel", "java-1.7.0-openjdk-devel",
+            "vim-enhanced", "openssl-devel", "boost-devel", "python-devel",
+            "pcre-devel", "log4cxx-devel", "npm",
+            "libtool", "byacc", "flex", /* for thrift build */
+          ]
 
-  package { $build_base:
+  package { $pkgs:
     ensure => latest,
     provider => yum,
   }
@@ -30,6 +34,21 @@ class base {
     ensure => latest,
     provider => gem,
     require => Package["ruby-devel"]
+  }
+
+  exec { "bower":
+    command => "npm install -g bower",
+    path => "/bin:/usr/bin:/usr/local/bin",
+    subscribe => Package["npm"],
+    refreshonly => true,
+    logoutput => on_failure,
+    timeout => 0,
+  }
+
+  file { "/usr/lib64/libboost_thread.so":
+    ensure => link,
+    target => "/usr/lib64/libboost_thread-mt.so",
+    require => Package["boost-devel"]
   }
 
   define ensure_env_value($key, $value, $file="/home/vagrant/.bashrc") {

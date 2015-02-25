@@ -25,7 +25,7 @@ Vagrant.configure($VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "../.git", "/home/vagrant/.sync_git"
 
   config.vm.provider "virtualbox" do |vb|
-    vb.customize ["modifyvm", :id, "--memory", "1024"]
+    vb.customize ["modifyvm", :id, "--memory", "4096"]
   end
 
   #install required modules
@@ -36,7 +36,7 @@ Vagrant.configure($VAGRANTFILE_API_VERSION) do |config|
                                         puppet module install puppetlabs-vcsrepo"
 
   config.vm.provision "puppet" do |p|
-    p.manifest_file = "base.pp"
+    p.manifest_file = "pre.pp"
     p.module_path = "modules"
   end
 
@@ -52,15 +52,11 @@ Vagrant.configure($VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.provision "shell", path: "provisioning/python_installation.sh"
-  config.vm.provision "shell", path: "provisioning/thrift_installation.sh"
-  config.vm.provision "shell", path: "provisioning/autoconf_installation.sh"
-  config.vm.provision "shell", path: "provisioning/boost_library_patch.sh"
-  config.vm.provision "shell", path: "provisioning/npm_installation.sh"
   config.vm.provision "shell", path: "provisioning/maven_installation.sh"
-  config.vm.provision "shell", path: "provisioning/addusers.sh"
+  config.vm.provision "shell", path: "provisioning/thrift_installation.sh"
 
   config.vm.provision "puppet" do |p|
-    p.manifest_file = "site.pp"
+    p.manifest_file = "post.pp"
     p.module_path = "modules"
   end
 
