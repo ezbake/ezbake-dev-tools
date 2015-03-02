@@ -16,7 +16,7 @@
     <modules>
         <module>local-accumulo</module>
         <module>local-redis</module>
-        <module>protect-mock-services</module>
+        <!-- <module>protect-mock-services</module> -->
         <module>thrift-gen</module>
         <module>thrift-visibility-converter</module>
     </modules>
