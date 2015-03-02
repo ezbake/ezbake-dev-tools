@@ -18,7 +18,7 @@
         <module>local-redis</module>
         <!-- <module>protect-mock-services</module> -->
         <module>thrift-gen</module>
-        <module>thrift-visibility-converter</module>
+        <!-- <module>thrift-visibility-converter</module> -->
     </modules>
 
     <dependencyManagement>
