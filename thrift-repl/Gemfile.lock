@@ -1,0 +1,10 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    nokogiri (1.6.3.1-java)
+
+PLATFORMS
+  java
+
+DEPENDENCIES
+  nokogiri (= 1.6.3.1)
